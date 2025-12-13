@@ -7,7 +7,7 @@ let rateTarget = document.querySelector(".rate-target");
 let amountSource = document.querySelector(".amount-source");
 let amountTarget = document.querySelector(".amount-target");
 let recentSide;
-const API_TOKEN = "e7fe5db8e025f1e03f3964db";
+const ACCESS_KEY = "475afb8526c0732ff40ca593c14fe268";
 let queuedExchange = null;
 
 const offlineMsg = document.querySelector(".offline-message");
@@ -40,12 +40,12 @@ window.addEventListener("online", function () {
 
 function performExchange(from, to, amount) {
   return fetch(
-    `https://v6.exchangerate-api.com/v6/${API_TOKEN}/pair/${from}/${to}/${amount}`
+    `https://api.exchangerate.host/convert?access_key=${ACCESS_KEY}&from=${from}&to=${to}&amount=${amount}`
   )
     .then((response) => response.json())
     .then((data) => {
-      if (data.result === "success") {
-        return data.conversion_result;
+      if (data.success) {
+        return data.result;
       } else {
         console.error("Conversion error:", data);
         return "error";
@@ -131,19 +131,24 @@ function refreshRates(fromCurrency, toCurrency) {
     }
   } else {
     fetch(
-      `https://v6.exchangerate-api.com/v6/${API_TOKEN}/latest/${fromCurrency}`
+      `https://api.exchangerate.host/live?access_key=${ACCESS_KEY}&source=${fromCurrency}&currencies=${toCurrency}`
     )
       .then((response) => response.json())
       .then((data) => {
-        const exchangeRateSource = data.conversion_rates[toCurrency];
-        if (exchangeRateSource) {
-          rateSource.textContent = `1 ${fromCurrency} = ${exchangeRateSource.toFixed(
-            5
-          )} ${toCurrency}`;
-          if (recentSide === "source") {
-            amountTarget.value = sanitizeValue(
-              (parseFloat(amountSource.value) * exchangeRateSource).toFixed(5)
-            );
+        if (data.success) {
+          const currencyPair = fromCurrency + toCurrency;
+          const exchangeRateSource = data.quotes[currencyPair];
+          if (exchangeRateSource) {
+            rateSource.textContent = `1 ${fromCurrency} = ${exchangeRateSource.toFixed(
+              5
+            )} ${toCurrency}`;
+            if (recentSide === "source") {
+              amountTarget.value = sanitizeValue(
+                (parseFloat(amountSource.value) * exchangeRateSource).toFixed(5)
+              );
+            }
+          } else {
+            rateSource.textContent = "Error fetching rate";
           }
         } else {
           rateSource.textContent = "Error fetching rate";
@@ -152,19 +157,24 @@ function refreshRates(fromCurrency, toCurrency) {
       .catch(() => (rateSource.textContent = "Error fetching rate"));
 
     fetch(
-      `https://v6.exchangerate-api.com/v6/${API_TOKEN}/latest/${toCurrency}`
+      `https://api.exchangerate.host/live?access_key=${ACCESS_KEY}&source=${toCurrency}&currencies=${fromCurrency}`
     )
       .then((response) => response.json())
       .then((data) => {
-        const exchangeRateTarget = data.conversion_rates[fromCurrency];
-        if (exchangeRateTarget) {
-          rateTarget.textContent = `1 ${toCurrency} = ${exchangeRateTarget.toFixed(
-            5
-          )} ${fromCurrency}`;
-          if (recentSide === "target") {
-            amountSource.value = sanitizeValue(
-              (parseFloat(amountTarget.value) * exchangeRateTarget).toFixed(5)
-            );
+        if (data.success) {
+          const currencyPair = toCurrency + fromCurrency;
+          const exchangeRateTarget = data.quotes[currencyPair];
+          if (exchangeRateTarget) {
+            rateTarget.textContent = `1 ${toCurrency} = ${exchangeRateTarget.toFixed(
+              5
+            )} ${fromCurrency}`;
+            if (recentSide === "target") {
+              amountSource.value = sanitizeValue(
+                (parseFloat(amountTarget.value) * exchangeRateTarget).toFixed(5)
+              );
+            }
+          } else {
+            rateTarget.textContent = "Error fetching rate";
           }
         } else {
           rateTarget.textContent = "Error fetching rate";
