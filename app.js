@@ -9,7 +9,7 @@ let amountTarget = document.querySelector(".amount-target");
 let recentSide;
 const ACCESS_KEY = "7b83f04bbf434bfe5e9da4b9f0c98047";
 let queuedExchange = null;
-
+//ueue
 const offlineMsg = document.querySelector(".offline-message");
 const onlineMsg = document.querySelector(".online-message");
 
