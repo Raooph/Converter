@@ -7,7 +7,7 @@ let rateTarget = document.querySelector(".rate-target");
 let amountSource = document.querySelector(".amount-source");
 let amountTarget = document.querySelector(".amount-target");
 let recentSide;
-const ACCESS_KEY = "475afb8526c0732ff40ca593c14fe268";
+const ACCESS_KEY = "7b83f04bbf434bfe5e9da4b9f0c98047";
 let queuedExchange = null;
 
 const offlineMsg = document.querySelector(".offline-message");
